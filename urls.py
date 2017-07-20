@@ -13,17 +13,31 @@ from django.conf.urls import url
 from .views import index
 from .utils import administrate_debug_message
 import importlib
-
+import sys, inspect
 
 def applist():
     for app in settings.INSTALLED_APPS:
         if app in ['administrate.administrate', 'administrate']:
             continue
+
+
+            #from "{}.administrate".format(app) import *
         try:
-            importlib.import_module('{}.administrate'.format(app))
+            module_name = '{}.administrate'.format(app)
+            importlib.import_module(module_name)
             administrate_debug_message('{}.administrate OK'.format(app))
+            clsmembers = inspect.getmembers(sys.modules[module_name], inspect.isclass)
+            if len(clsmembers) > 0:
+                # Делать типа обзор апликухи
+                pass
+            for c in clsmembers:
+                print c[0].lower()
+                c[1].get_urls()
         except:
+            print sys.exc_info()
             administrate_debug_message('{}.administrate not found'.format(app))
+            continue
+        #print module
 
 
 def get_urls():
